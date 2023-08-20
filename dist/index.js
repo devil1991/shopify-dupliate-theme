@@ -118,7 +118,7 @@ const pullLiveTheme = (store, folder) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.pullLiveTheme = pullLiveTheme;
 const pushUnpublishedTheme = (store, folder, name) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme ${name} --unpublished --json`);
+    const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --json`);
     const responseString = response.toString();
     const responseJSON = JSON.parse(responseString);
     const themeID = responseJSON.theme.id;

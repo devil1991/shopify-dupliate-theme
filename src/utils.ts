@@ -39,7 +39,7 @@ export const pushUnpublishedTheme = async (
   name: string
 ): Promise<string> => {
   const response = await execShellCommand(
-    `shopify theme push --unpublished --path ${folder} --store ${store} --theme ${name} --unpublished --json`
+    `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --json`
   )
 
   const responseString = response.toString()
