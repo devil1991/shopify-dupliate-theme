@@ -54,7 +54,8 @@ function run() {
                 trimWhitespace: true
             });
             yield (0, utils_1.pullLiveTheme)(store, TEMP_FOLDER);
-            yield (0, utils_1.pushUnpublishedTheme)(store, TEMP_FOLDER, env);
+            const themeID = yield (0, utils_1.pushUnpublishedTheme)(store, TEMP_FOLDER, env);
+            core.setOutput('themeId', themeID);
         }
         catch (error) {
             if (error instanceof Error)
@@ -117,7 +118,13 @@ const pullLiveTheme = (store, folder) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.pullLiveTheme = pullLiveTheme;
 const pushUnpublishedTheme = (store, folder, name) => __awaiter(void 0, void 0, void 0, function* () {
-    yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme ${name} --unpublished`);
+    const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme ${name} --unpublished --json`);
+    const responseString = response.toString();
+    const responseJSON = JSON.parse(responseString);
+    const themeID = responseJSON.theme.id;
+    if (!themeID)
+        throw new Error('Failed to create new theme');
+    return themeID;
 });
 exports.pushUnpublishedTheme = pushUnpublishedTheme;
 // Patterh for name: [{env}] Latest Snapshot {date is in format MM.DD.YY}

@@ -15,7 +15,8 @@ async function run(): Promise<void> {
     })
 
     await pullLiveTheme(store, TEMP_FOLDER)
-    await pushUnpublishedTheme(store, TEMP_FOLDER, env)
+    const themeID = await pushUnpublishedTheme(store, TEMP_FOLDER, env)
+    core.setOutput('themeId', themeID)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   } finally {

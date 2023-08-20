@@ -37,10 +37,16 @@ export const pushUnpublishedTheme = async (
   store: string,
   folder: string,
   name: string
-): Promise<void> => {
-  await execShellCommand(
-    `shopify theme push --unpublished --path ${folder} --store ${store} --theme ${name} --unpublished`
+): Promise<string> => {
+  const response = await execShellCommand(
+    `shopify theme push --unpublished --path ${folder} --store ${store} --theme ${name} --unpublished --json`
   )
+
+  const responseString = response.toString()
+  const responseJSON = JSON.parse(responseString)
+  const themeID = responseJSON.theme.id
+  if (!themeID) throw new Error('Failed to create new theme')
+  return themeID
 }
 
 // Patterh for name: [{env}] Latest Snapshot {date is in format MM.DD.YY}
