@@ -62,7 +62,7 @@ function run() {
                 core.setFailed(error.message);
         }
         finally {
-            yield (0, utils_1.cleanRemoteFiles)('duplicate');
+            yield (0, utils_1.cleanRemoteFiles)(TEMP_FOLDER);
         }
     });
 }
