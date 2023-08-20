@@ -1,18 +1,25 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {pullLiveTheme, cleanRemoteFiles, pushUnpublishedTheme} from './utils'
 
+const TEMP_FOLDER = 'duplicate'
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const store: string = core.getInput('store', {
+      required: true,
+      trimWhitespace: true
+    })
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const env: string = core.getInput('env', {
+      required: true,
+      trimWhitespace: true
+    })
 
-    core.setOutput('time', new Date().toTimeString())
+    await pullLiveTheme(store, TEMP_FOLDER)
+    await pushUnpublishedTheme(store, TEMP_FOLDER, env)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
+  } finally {
+    await cleanRemoteFiles('duplicate')
   }
 }
 

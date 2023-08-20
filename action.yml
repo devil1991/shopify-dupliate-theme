@@ -1,11 +1,13 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Shopify Theme Dupliate'
+description: 'Sync Shopify Theme JSONs'
+author: 'devil1991'
 inputs:
-  milliseconds: # change this
+  store:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'Store'
+  env:
+    required: true
+    description: 'Env Staging / Production used as Prefix'
 runs:
-  using: 'node16'
   main: 'dist/index.js'
+  using: 'node16'
