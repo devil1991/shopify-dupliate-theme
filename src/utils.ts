@@ -33,19 +33,34 @@ export const pullLiveTheme = async (
   )
 }
 
+export const pushContextBasedTemplate = async (
+  store: string,
+  folder: string,
+  themeID: string
+): Promise<void> => {
+  try {
+    await execShellCommand(
+      `shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only **/*.context.* --json`
+    )
+  } catch (error) {
+    debug('Failed to push context based templates')
+  }
+}
+
 export const pushUnpublishedTheme = async (
   store: string,
   folder: string,
   name: string
 ): Promise<string> => {
   const response = await execShellCommand(
-    `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --json`
+    `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore **/*.context.* --json`
   )
 
   const responseString = response.toString()
   const responseJSON = JSON.parse(responseString)
   const themeID = responseJSON.theme.id
   if (!themeID) throw new Error('Failed to create new theme')
+  await pushContextBasedTemplate(store, folder, themeID.toString())
   return themeID
 }
 
