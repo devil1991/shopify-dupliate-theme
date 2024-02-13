@@ -10,4 +10,4 @@ inputs:
     description: 'Env Staging / Production used as Prefix'
 runs:
   main: 'dist/index.js'
-  using: 'node16'
+  using: 'node20'
