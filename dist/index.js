@@ -119,7 +119,7 @@ const pullLiveTheme = (store, folder) => __awaiter(void 0, void 0, void 0, funct
 exports.pullLiveTheme = pullLiveTheme;
 const pushContextBasedTemplate = (store, folder, themeID) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield execShellCommand(`shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only **/**.context.* --json`);
+        yield execShellCommand(`shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only **/*context*.json --json`);
     }
     catch (error) {
         (0, core_1.debug)('Failed to push context based templates');
@@ -127,7 +127,7 @@ const pushContextBasedTemplate = (store, folder, themeID) => __awaiter(void 0, v
 });
 exports.pushContextBasedTemplate = pushContextBasedTemplate;
 const pushUnpublishedTheme = (store, folder, name) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore **/**.context.* --json`);
+    const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore **/*context*.json --json`);
     const responseString = response.toString();
     const responseJSON = JSON.parse(responseString);
     const themeID = responseJSON.theme.id;
