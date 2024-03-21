@@ -33,6 +33,7 @@ export const pullLiveTheme = async (
   )
 }
 
+const CONTEXT_BASED_TEMPLATE_REGEX = /.*context.*\.json/
 export const pushContextBasedTemplate = async (
   store: string,
   folder: string,
@@ -40,7 +41,7 @@ export const pushContextBasedTemplate = async (
 ): Promise<void> => {
   try {
     await execShellCommand(
-      `shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only **/*context*.json --json`
+      `shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only ${CONTEXT_BASED_TEMPLATE_REGEX} --json`
     )
   } catch (error) {
     debug('Failed to push context based templates')
@@ -53,7 +54,7 @@ export const pushUnpublishedTheme = async (
   name: string
 ): Promise<string> => {
   const response = await execShellCommand(
-    `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore **/*context*.json --json`
+    `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore ${CONTEXT_BASED_TEMPLATE_REGEX} --json`
   )
 
   const responseString = response.toString()
