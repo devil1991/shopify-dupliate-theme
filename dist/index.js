@@ -116,7 +116,7 @@ const cleanRemoteFiles = (folder) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.cleanRemoteFiles = cleanRemoteFiles;
 const pullLiveTheme = (store, folder) => __awaiter(void 0, void 0, void 0, function* () {
-    yield execShellCommand(`shopify theme pull --live --path ${folder} --store ${store}`);
+    yield execShellCommand(`shopify theme pull --live --path ${folder} --store ${store} --verbose --json`);
 });
 exports.pullLiveTheme = pullLiveTheme;
 const CONTEXT_BASED_TEMPLATE_REGEX = /.*context.*\.json/;
