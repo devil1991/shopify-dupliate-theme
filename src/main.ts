@@ -5,7 +5,6 @@ import {
   pushUnpublishedTheme,
   generateThemeNameForEnv
 } from './utils'
-import {generate} from 'csv/.'
 
 const TEMP_FOLDER = 'duplicate'
 async function run(): Promise<void> {
