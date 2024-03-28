@@ -59,8 +59,11 @@ export const pushUnpublishedTheme = async (
 
   const responseString = response.toString()
   const responseJSON = JSON.parse(responseString)
-  const themeID = responseJSON.theme.id
-  if (!themeID) throw new Error('Failed to create new theme')
+  const themeID = responseJSON?.theme?.id
+  if (!themeID) {
+    debug(responseString)
+    throw new Error('Failed to create new theme')
+  }
   await pushContextBasedTemplate(store, folder, themeID.toString())
   return themeID
 }

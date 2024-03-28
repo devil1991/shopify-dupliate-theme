@@ -128,12 +128,15 @@ const pushContextBasedTemplate = (store, folder, themeID) => __awaiter(void 0, v
 });
 exports.pushContextBasedTemplate = pushContextBasedTemplate;
 const pushUnpublishedTheme = (store, folder, name) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore ${CONTEXT_BASED_TEMPLATE_REGEX} --json`);
     const responseString = response.toString();
     const responseJSON = JSON.parse(responseString);
-    const themeID = responseJSON.theme.id;
-    if (!themeID)
+    const themeID = (_a = responseJSON === null || responseJSON === void 0 ? void 0 : responseJSON.theme) === null || _a === void 0 ? void 0 : _a.id;
+    if (!themeID) {
+        (0, core_1.debug)(responseString);
         throw new Error('Failed to create new theme');
+    }
     yield (0, exports.pushContextBasedTemplate)(store, folder, themeID.toString());
     return themeID;
 });
