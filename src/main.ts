@@ -18,8 +18,7 @@ async function run(): Promise<void> {
       required: true,
       trimWhitespace: true
     })
-    const pullcommand = await pullLiveTheme(store, TEMP_FOLDER)
-    core.debug(pullcommand.toString())
+    await pullLiveTheme(store, TEMP_FOLDER)
     const themeID = await pushUnpublishedTheme(
       store,
       TEMP_FOLDER,
