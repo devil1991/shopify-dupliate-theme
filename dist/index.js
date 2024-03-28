@@ -53,9 +53,8 @@ function run() {
                 required: true,
                 trimWhitespace: true
             });
-            core.debug(`store: ${store}`);
-            core.debug(`store: ${env}`);
-            yield (0, utils_1.pullLiveTheme)(store, TEMP_FOLDER);
+            const pullcommand = yield (0, utils_1.pullLiveTheme)(store, TEMP_FOLDER);
+            core.debug(pullcommand.toString());
             const themeID = yield (0, utils_1.pushUnpublishedTheme)(store, TEMP_FOLDER, (0, utils_1.generateThemeNameForEnv)(env));
             core.setOutput('themeId', themeID);
         }
@@ -116,7 +115,7 @@ const cleanRemoteFiles = (folder) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.cleanRemoteFiles = cleanRemoteFiles;
 const pullLiveTheme = (store, folder) => __awaiter(void 0, void 0, void 0, function* () {
-    yield execShellCommand(`shopify theme pull --live --path ${folder} --store ${store} --verbose`);
+    return yield execShellCommand(`shopify theme pull --live --path ${folder} --store ${store} --verbose`);
 });
 exports.pullLiveTheme = pullLiveTheme;
 const CONTEXT_BASED_TEMPLATE_REGEX = /.*context.*\.json/;

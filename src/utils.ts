@@ -27,11 +27,10 @@ export const cleanRemoteFiles = async (folder: string): Promise<void> => {
 export const pullLiveTheme = async (
   store: string,
   folder: string
-): Promise<void> => {
+): Promise<string | Buffer> =>
   await execShellCommand(
     `shopify theme pull --live --path ${folder} --store ${store} --verbose`
   )
-}
 
 const CONTEXT_BASED_TEMPLATE_REGEX = /.*context.*\.json/
 export const pushContextBasedTemplate = async (
