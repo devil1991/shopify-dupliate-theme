@@ -53,8 +53,7 @@ function run() {
                 required: true,
                 trimWhitespace: true
             });
-            const pullcommand = yield (0, utils_1.pullLiveTheme)(store, TEMP_FOLDER);
-            core.debug(pullcommand.toString());
+            yield (0, utils_1.pullLiveTheme)(store, TEMP_FOLDER);
             const themeID = yield (0, utils_1.pushUnpublishedTheme)(store, TEMP_FOLDER, (0, utils_1.generateThemeNameForEnv)(env));
             core.setOutput('themeId', themeID);
         }
