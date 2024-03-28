@@ -41,7 +41,7 @@ export const pushContextBasedTemplate = async (
 ): Promise<void> => {
   try {
     await execShellCommand(
-      `shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only ${CONTEXT_BASED_TEMPLATE_REGEX} --json`
+      `shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only ${CONTEXT_BASED_TEMPLATE_REGEX} --json --verbose`
     )
   } catch (error) {
     debug('Failed to push context based templates')
@@ -64,6 +64,7 @@ export const pushUnpublishedTheme = async (
     debug(responseString)
     throw new Error('Failed to create new theme')
   }
+  debug(`Created new theme with ID: ${themeID}`)
   await pushContextBasedTemplate(store, folder, themeID.toString())
   return themeID
 }

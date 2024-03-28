@@ -120,7 +120,7 @@ exports.pullLiveTheme = pullLiveTheme;
 const CONTEXT_BASED_TEMPLATE_REGEX = /.*context.*\.json/;
 const pushContextBasedTemplate = (store, folder, themeID) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield execShellCommand(`shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only ${CONTEXT_BASED_TEMPLATE_REGEX} --json`);
+        yield execShellCommand(`shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only ${CONTEXT_BASED_TEMPLATE_REGEX} --json --verbose`);
     }
     catch (error) {
         (0, core_1.debug)('Failed to push context based templates');
@@ -137,6 +137,7 @@ const pushUnpublishedTheme = (store, folder, name) => __awaiter(void 0, void 0, 
         (0, core_1.debug)(responseString);
         throw new Error('Failed to create new theme');
     }
+    (0, core_1.debug)(`Created new theme with ID: ${themeID}`);
     yield (0, exports.pushContextBasedTemplate)(store, folder, themeID.toString());
     return themeID;
 });
