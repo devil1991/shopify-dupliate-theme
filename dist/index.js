@@ -53,6 +53,8 @@ function run() {
                 required: true,
                 trimWhitespace: true
             });
+            core.debug(`store: ${store}`);
+            core.debug(`store: ${env}`);
             yield (0, utils_1.pullLiveTheme)(store, TEMP_FOLDER);
             const themeID = yield (0, utils_1.pushUnpublishedTheme)(store, TEMP_FOLDER, (0, utils_1.generateThemeNameForEnv)(env));
             core.setOutput('themeId', themeID);
@@ -129,7 +131,6 @@ const pushContextBasedTemplate = (store, folder, themeID) => __awaiter(void 0, v
 exports.pushContextBasedTemplate = pushContextBasedTemplate;
 const pushUnpublishedTheme = (store, folder, name) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    yield execShellCommand('ls');
     const response = yield execShellCommand(`shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore ${CONTEXT_BASED_TEMPLATE_REGEX} --json`);
     const responseString = response.toString();
     const responseJSON = JSON.parse(responseString);

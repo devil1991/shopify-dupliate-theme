@@ -53,7 +53,6 @@ export const pushUnpublishedTheme = async (
   folder: string,
   name: string
 ): Promise<string> => {
-  await execShellCommand('ls')
   const response = await execShellCommand(
     `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore ${CONTEXT_BASED_TEMPLATE_REGEX} --json`
   )
