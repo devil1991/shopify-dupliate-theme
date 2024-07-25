@@ -72,7 +72,7 @@ export const pushUnpublishedTheme = async (
 // Patterh for name: [{env}] Latest Snapshot {date is in format MM.DD.YY}
 export const generateThemeNameForEnv = (env: string): string => {
   const date = new Date()
-  return `[${env}] Latest Snapshot ${date
+  return `[${env}] ${date
     .toLocaleDateString('en-US')
-    .replace(/\//g, '.')}`
+    .replace(/\//g, '.')}`.slice(0, 49)
 }

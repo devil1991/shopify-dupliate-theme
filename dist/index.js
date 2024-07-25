@@ -145,9 +145,9 @@ exports.pushUnpublishedTheme = pushUnpublishedTheme;
 // Patterh for name: [{env}] Latest Snapshot {date is in format MM.DD.YY}
 const generateThemeNameForEnv = (env) => {
     const date = new Date();
-    return `[${env}] Latest Snapshot ${date
+    return `[${env}] ${date
         .toLocaleDateString('en-US')
-        .replace(/\//g, '.')}`;
+        .replace(/\//g, '.')}`.slice(0, 49);
 };
 exports.generateThemeNameForEnv = generateThemeNameForEnv;
 
