@@ -170,7 +170,7 @@ export const duplicateWithThemeIDUsingCLI = async (
   store: string,
   themeID: string,
   name: string
-): Promise<void> => {
+): Promise<string> => {
   const response = await execShellCommand(
     `shopify theme duplicate --store ${store} --theme ${themeID} --name '${name}' --json`
   )

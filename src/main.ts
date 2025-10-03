@@ -53,16 +53,16 @@ async function run(): Promise<void> {
     }
 
     await ensureThemeExists(store, themeIdToDuplicate)
-
-    await waitForThemeToBeReady(store, themeIdToDuplicate, {
-      maxWaitMinutes,
-      checkIntervalSeconds
-    })
     const themeID = await duplicateWithThemeIDUsingCLI(
       store,
       themeIdToDuplicate,
       generateThemeNameForEnv(env)
     )
+    core.info(`Waiting for theme ID ${themeID} to be ready...`)
+    await waitForThemeToBeReady(store, themeID, {
+      maxWaitMinutes,
+      checkIntervalSeconds
+    })
     core.setOutput('themeId', themeID)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
