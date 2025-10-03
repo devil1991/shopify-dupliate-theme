@@ -1,5 +1,4 @@
-import {debug} from '@actions/core'
-import {rmRF} from '@actions/io'
+import {debug, getInput, info} from '@actions/core'
 import {ExecException, exec as nativeExec} from 'child_process'
 
 export async function execShellCommand(cmd: string): Promise<string | Buffer> {
@@ -16,57 +15,174 @@ export async function execShellCommand(cmd: string): Promise<string | Buffer> {
   })
 }
 
-export const cleanRemoteFiles = async (folder: string): Promise<void> => {
-  try {
-    rmRF(folder)
-  } catch (error) {
-    if (error instanceof Error) debug(error.message)
-  }
-}
-
-export const pullLiveTheme = async (
-  store: string,
-  folder: string
-): Promise<void> => {
-  await execShellCommand(
-    `shopify theme pull --live --path ${folder} --store ${store}`
-  )
-}
-
-const CONTEXT_BASED_TEMPLATE_REGEX = /.*context.*\.json/
-export const pushContextBasedTemplate = async (
-  store: string,
-  folder: string,
-  themeID: string
-): Promise<void> => {
-  try {
-    await execShellCommand(
-      `shopify theme push --path ${folder} --store ${store} --theme ${themeID} --only ${CONTEXT_BASED_TEMPLATE_REGEX} --json`
-    )
-  } catch (error) {
-    debug('Failed to push context based templates')
-  }
-}
-
-export const pushUnpublishedTheme = async (
-  store: string,
-  folder: string,
+export type ShopifyTheme = {
+  id: number
   name: string
-): Promise<string> => {
-  const response = await execShellCommand(
-    `shopify theme push --unpublished --path ${folder} --store ${store} --theme '${name}' --unpublished --ignore ${CONTEXT_BASED_TEMPLATE_REGEX} --json`
-  )
+  processing: boolean
+  createdAtRuntime: boolean
+  role: 'live' | 'unpublished' | 'main' | 'development'
+}
 
+export const normalizeThemeId = (themeId: string | number): string => {
+  return String(themeId).trim()
+}
+
+export function getPositiveNumberInput(
+  name: string,
+  defaultValue: number
+): number {
+  const rawValue = getInput(name, {
+    required: false,
+    trimWhitespace: true
+  })
+
+  const value = rawValue ? Number(rawValue) : defaultValue
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(
+      `Input "${name}" must be a positive number. Received: ${rawValue}`
+    )
+  }
+
+  return value
+}
+
+export const getLiveThemeID = async (store: string): Promise<string> => {
+  const themes = await loadAllThemes(store)
+  const liveTheme = themes.find(
+    (theme: ShopifyTheme) => theme.role === 'live' || theme.role === 'main'
+  )
+  if (!liveTheme) {
+    throw new Error('Failed to get live theme')
+  }
+
+  const liveThemeId = normalizeThemeId(liveTheme.id)
+  debug(`Live theme ID: ${liveThemeId}`)
+  return liveThemeId
+}
+
+export const loadAllThemes = async (store: string): Promise<ShopifyTheme[]> => {
+  const response = await execShellCommand(
+    `shopify theme list --store ${store} --json`
+  )
   const responseString = response.toString()
   const responseJSON = JSON.parse(responseString)
-  const themeID = responseJSON?.theme?.id || responseJSON?.id
-  if (!themeID) {
-    debug(responseString)
-    throw new Error('Failed to create new theme')
+  debug(`Found ${responseJSON.length} themes`)
+  return responseJSON as ShopifyTheme[]
+}
+
+export const checkIfThemeIsProcessing = async (
+  store: string,
+  themeID: string
+): Promise<boolean> => {
+  const targetThemeId = normalizeThemeId(themeID)
+  const themes = await loadAllThemes(store)
+  const theme = themes.find(
+    (_theme: ShopifyTheme) => normalizeThemeId(_theme.id) === targetThemeId
+  )
+  if (!theme) {
+    throw new Error(`Failed to find theme with ID: ${targetThemeId}`)
   }
-  debug(`Created new theme with ID: ${themeID}`)
-  await pushContextBasedTemplate(store, folder, themeID.toString())
-  return themeID
+  return theme.processing
+}
+
+export const ensureThemeExists = async (
+  store: string,
+  themeID: string
+): Promise<ShopifyTheme> => {
+  const targetThemeId = normalizeThemeId(themeID)
+  const themes = await loadAllThemes(store)
+  const theme = themes.find(
+    (_theme: ShopifyTheme) => normalizeThemeId(_theme.id) === targetThemeId
+  )
+
+  if (!theme) {
+    throw new Error(
+      `Theme with ID: ${targetThemeId} does not exist in store ${store}.`
+    )
+  }
+
+  return theme
+}
+
+type WaitForThemeOptions = {
+  maxWaitMinutes?: number
+  checkIntervalSeconds?: number
+}
+
+export const waitForThemeToBeReady = async (
+  store: string,
+  themeID: string,
+  options: WaitForThemeOptions = {}
+): Promise<void> => {
+  const {maxWaitMinutes = 5, checkIntervalSeconds = 30} = options
+  if (checkIntervalSeconds <= 0) {
+    throw new Error('checkIntervalSeconds must be greater than zero')
+  }
+
+  const totalSeconds = maxWaitMinutes * 60
+  if (totalSeconds <= 0) {
+    throw new Error('maxWaitMinutes must be greater than zero')
+  }
+
+  const maxAttempts = Math.max(
+    1,
+    Math.ceil(totalSeconds / checkIntervalSeconds)
+  )
+
+  info(
+    `Waiting up to ${maxWaitMinutes} minute(s) for theme ${themeID} to be ready (checking every ${checkIntervalSeconds} second(s)).`
+  )
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const isProcessing = await checkIfThemeIsProcessing(store, themeID)
+    if (!isProcessing) {
+      const elapsedSeconds = (attempt - 1) * checkIntervalSeconds
+      info(
+        `Theme ${themeID} is ready after waiting ${elapsedSeconds} second(s).`
+      )
+      return
+    }
+
+    const remainingAttempts = maxAttempts - attempt
+    info(
+      `Theme ${themeID} still processing (attempt ${attempt}/${maxAttempts}). Next check in ${checkIntervalSeconds} second(s).${
+        remainingAttempts > 0
+          ? ` Remaining attempts: ${remainingAttempts}.`
+          : ''
+      }`
+    )
+
+    if (attempt === maxAttempts) {
+      break
+    }
+
+    await new Promise(resolve =>
+      setTimeout(resolve, checkIntervalSeconds * 1000)
+    )
+  }
+
+  throw new Error(
+    `Theme with ID: ${themeID} is still processing after ${maxWaitMinutes} minute(s).`
+  )
+}
+
+export const duplicateWithThemeIDUsingCLI = async (
+  store: string,
+  themeID: string,
+  name: string
+): Promise<void> => {
+  const response = await execShellCommand(
+    `shopify theme duplicate --store ${store} --theme ${themeID} --name '${name}' --json`
+  )
+  const responseString = response.toString()
+  const responseJSON = JSON.parse(responseString)
+  const newThemeID = responseJSON?.theme?.id || responseJSON?.id
+  if (!newThemeID) {
+    debug(responseString)
+    throw new Error('Failed to duplicate theme')
+  }
+  debug(`Created new theme with ID: ${newThemeID}`)
+  return newThemeID
 }
 
 // Patterh for name: [{env}] Latest Snapshot {date is in format MM.DD.YY}
