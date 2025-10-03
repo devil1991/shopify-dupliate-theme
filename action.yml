@@ -1,5 +1,5 @@
-name: 'Shopify Theme Dupliate'
-description: 'Sync Shopify Theme JSONs'
+name: 'Duplicate Shopify Theme'
+description: 'Waits for the live Shopify theme to finish processing and then duplicates it for the requested environment.'
 author: 'devil1991'
 inputs:
   store:
@@ -8,6 +8,17 @@ inputs:
   env:
     required: true
     description: 'Env Staging / Production used as Prefix'
+  max-wait-minutes:
+    required: false
+    description: 'Maximum minutes to wait for the live theme to finish processing'
+    default: '5'
+  check-interval-seconds:
+    required: false
+    description: 'Seconds to wait between checks for theme readiness'
+    default: '30'
+  source-theme-id:
+    required: false
+    description: 'Optional theme ID to duplicate instead of the current live theme'
 runs:
   main: 'dist/index.js'
   using: 'node20'
